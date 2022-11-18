@@ -1,0 +1,121 @@
+PROBLEM STATEMENT:
+
+The Byzantine Generals Problem is a way to model the reliability of computer systems, namely
+distributed systems.
+
+We imagine there are multiple division of the Byzantine army sieging a city, with each division
+being led by a general. The generals can only communicate by messenger. The generals need to 
+decide and agree on a plan. Unfortunately there can be traitorous generals trying to prevent the 
+generals coming to an agreement. The generals have to come up with an algorithm to guarantee that:
+
+    A) All loyal generals decide upon the same plan of action.
+    B) A small number of traitors cannot cause the loyal generals to adopt a bad plan.
+
+Loyal generals will follow the algorithm, while traitors will do what they wish.
+
+It is hard to quantify what a "bad" plan is, so the paper does not try and qualify it. Instead they
+explore how the generals can reach a decision. Let there be n generals and v(i) be the information
+sent by the ith general. A general has to use some method of taking all of the plans communicated to
+them, v(1),...,v(n), and combining them into one plan. Having all of the generals use the same
+method of combining the information will meet Condition A.
+
+To simplify the problem, we say that the plan can only be whether to attack or to retreat, making
+v(i) General i's opinion on which of the two options is the best. So each general can take a
+majority vote of v(1),...,v(n) and decide that whichever option wins is the best. This method only
+lets a small number of traitors affect the result if the loyal generals are split on the two options,
+in which case neither decision can be deemed "bad". So to satisfy Condition B, we must use a robust
+algorithm that makes it difficult for a small number of traitors to disrupt the plan.
+
+To ensure that Condition A and Condition B are met, we need to meet two other conditions:
+
+    1) Every loyal general must obtain the same information v(1),...,v(n).
+    2) If the ith general is loyal, then the value that he sends must be used by every loyal general
+       as teh value of v(i).
+
+These are important because a loyal general cannot take a value v(i) at face value, because a
+traitorous general could send different values of v(i) to different generals. Even though the
+generals cannot necessarily trust every message, we must find a way to guarantee that loyal generals
+use the values sent to them by other generals.
+
+Condition 1 can be rewritten as:
+
+    1'. For every i, any two loyal generals use the same value of v(i).
+
+Since Condition 1' and Condition 2 are both contingent on a single v(i) sent by the ith general, we
+can focus on how a single general sends values to others. We phrase this problem by referring to a
+commander sending messages to his lieutenants.
+
+Byzantine Generals Problem. A Commanding general must send an order to his n - 1 lieutenants such that
+
+    IC1. All loyal lieutenants obey the same order.
+    IC2. If the commander is loyal, the every loyal lieutenant obeys the order he sends.
+
+Conditions IC1 and Condition IC2 are called the interactive consistency conditions. // TODO: define that.
+
+If the commander is loyal, then IC1 follows IC2. However, the commander can be a traitor.
+
+----------------------------------------------------------------------------------------------------
+
+THREE GENERALS:
+
+When sending only oral messages, at least two thirds of the lieutenants must be loyal for any
+solution to work. The distinction of oral message is important, as it means that the contents of a
+message is completely up to sender. So a traitorous sender can send any message it wants.
+
+We will look at the simplest form of this problem, where there is three generals (one commander and
+two lieutenants). There are two possible orders: "attack" or "retreat". No solution can exist for
+this if there is a single traitor.
+
+Situation 1: The commander is loyal, but one of the lieutenants is a traitor. 
+
+The commander sends out the command "attack" to both lieutenants. Both lieutenants rely the order
+they receive to the other, but since one lieutenant is a traitor, they rely the message "retreat".
+The loyal lieutenant receives the set of orders: {"attack", "retreat"}, there is no way for him
+to decide which is the correct order. 
+
+// TODO: create a diagram for this.
+
+Situation 2: The commander is not loyal, both lieutenants are.
+
+The commander sends "attack" to Lieutenant 1 and "retreat" to Lieutenant 2. Since they are both loyal
+they rely the commands to the other. Lieutenant 1 receives the set of orders: {"attack", "retreat"}.
+
+Since Lieutenant 1 receives the set of orders: {"attack", "retreat"} in both situations, there is no
+way for him to know who they traitor is, so he follows his commander's orders to attack in both
+situations, regardless of if the commander is a traitor.
+
+We can make a similar argument that Lieutenant 2 must follow the "retreat" command in the second
+situation. This violates IC1 since the two loyal lieutenants obey different orders.
+
+// There is a proof for the three-generals problem by Diffie and Hellman
+// Maybe include it
+
+
+// Might not include this. I don't find it as interesting as the rest of the paper, and I'll likely
+// have to cut stuff from the presentation anyways. I can just use the above part of the 3 general
+// problem to help set the stage for the rest of the paper.
+// Might need it though, so I'll decide that later.
+Albanian General's Proof
+
+Using the result from Diffie and Hellman we can show that no solution with fewer than 3m+1 generals
+can cope with m traitors, with n > 3 generals. 
+We will prove this by contradiction. 
+We will refer to the generals from Diffie and Hellman's results as Byzantine generals and the 
+generals in this assumed solution as Albanian generals.
+
+Assume n <= 3m Albanian generals can handle m traitors. We simulate this by allowing a solution of
+3 Byzantine generals that can handle 1 traitor.
+
+Let each of the Byzantine generals simulate at most m Albanian generals. The Byzantine commander
+simulates the Albanian commander and at most m-1 Albanian lieutenants. Each of the Byzantine
+lieutenants at most m Albanian lieutenants. Since each Byzantine general simulates at most m
+Albanian generals, and there can only be one Byzantine traitor, there are at most m Albanian traitors.
+// TODO: finish this if I want to include it.
+
+// TODO: Add the part about the approximate.
+// Might not add this either.
+
+----------------------------------------------------------------------------------------------------
+
+ORAL SOLUTION:
+
