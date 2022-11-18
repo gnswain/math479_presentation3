@@ -90,11 +90,6 @@ situation. This violates IC1 since the two loyal lieutenants obey different orde
 // There is a proof for the three-generals problem by Diffie and Hellman
 // Maybe include it
 
-
-// Might not include this. I don't find it as interesting as the rest of the paper, and I'll likely
-// have to cut stuff from the presentation anyways. I can just use the above part of the 3 general
-// problem to help set the stage for the rest of the paper.
-// Might need it though, so I'll decide that later.
 Albanian General's Proof
 
 Using the result from Diffie and Hellman we can show that no solution with fewer than 3m+1 generals
@@ -110,12 +105,167 @@ Let each of the Byzantine generals simulate at most m Albanian generals. The Byz
 simulates the Albanian commander and at most m-1 Albanian lieutenants. Each of the Byzantine
 lieutenants at most m Albanian lieutenants. Since each Byzantine general simulates at most m
 Albanian generals, and there can only be one Byzantine traitor, there are at most m Albanian traitors.
-// TODO: finish this if I want to include it.
+// TODO: finish this
 
 // TODO: Add the part about the approximate.
-// Might not add this either.
 
 ----------------------------------------------------------------------------------------------------
 
 ORAL SOLUTION:
 
+The above section shows that we need at least 3m+1 generals to solve the Byzantine Generals Problem
+using oral messages, with m traitors.  In this section we will show a solution that will work for
+3m+1 or more generals. 
+
+We make three assumptions for oral messages:
+
+    A1) Every message that is sent is delivered correctly.
+    A2) The receiver of a message knows who sent it.
+    A3) The absence of a message can be detected.
+
+This assumptions each help prevent foul play by traitorous generals. A1 prevents generals from
+stopping messages from being received. A2 make it to where a general cannot impersonate another.
+A3 stops traitors who try and prevent a decision by not sending messages.
+
+For this problem we assume that every general is able to send a message to every other general. We
+will discuss later about when that is not the case. We also assume that every loyal general completes
+their algorithm. In the case of a traitorous general who does not send any orders at all, we assume
+that lieutenants default to the "retreat" order.
+
+We will define an algorithm for oral messages OM(m), for all nonnegative integers m. In this algorithm
+a commander sends an order to n-1 lieutenants. OM(m) will solve the Byzantine Generals Problem for
+3m+1 more generals with at most m traitors.
+
+As stated above, when a general receives a message, or a value, from a general, we denote it as v(i)
+for the ith general. Whenever a general has a set of all the messages, {v(1),...,v(n)}, they use a 
+majority function majority({v1,...,vn}) = v, v being the decision the lieutenant comes too. Two choices 
+for deciding the majority listed in the paper are:
+
+    1) The majority value among the v(i) (the value that occurs the most) if one exists, or default 
+       to the value "retreat".
+    2) The median value of the v(i), if they come from an ordered set.
+
+The algorithm is straight recursive, so we start with the base case of OM(0).
+
+Algorithm OM(0)
+    1) The commander sends his value to every lieutenant.
+    2) Each lieutenant uses the value he received from the commander. If he received no value, default
+       to "retreat".
+
+Algorithm OM(m), m > 0
+    1) The commander sends his value to every lieutenant.
+    2) For each i,
+        a) Lieutenant i receives a value v(i) from the commander. Default to "retreat"
+           if he receives no value.
+        b) Lieutenant i acts as the commander in OM(m-1) to send the message to each of the remaining
+           n-2 lieutenants.
+    3) For each i, and each j not equal to i, 
+        a) let v(j) be the value Lieutenant i received from
+           Lieutenant j in step (2b). Default to "retreat" if Lieutenant i received no value from
+           Lieutenant j.
+        b) Lieutenant i uses the value majority({v(1),...,v(n-1)}).
+
+Let's look at an example with four generals and one traitor, or n = 4 and m = 1. There are two
+situations, one of the lieutenants is a traitor or the commander is a traitor.
+
+// TODO: make the diagrams for these situations.
+
+Situation 1: Lieutenant 3 is a traitor.
+
+In the first step of the algorithm OM(1), the commander sends the order x to all three lieutenants.
+In the second step, Lieutenant 1 sends the value v to Lieutenant 2 using OM(0). Lieutenant 3 sends
+y to Lieutenant 2. In step 3, Lieutenant 2 has the set of orders v(1)=v(2)=x and v(3)=y. Using
+majority({x, x, y}) = x, Lieutenant 2 follows the order x sent to him by the commander. We can use
+a similar process to find that Lieutenant 1 also follows order x. So both loyal lieutenants followed
+the order of their loyal commander.
+
+Situation 2: The commander is a traitor.
+
+The commander sends the arbitrary orders x, y, z to Lieutenants 1, 2, 3 respectively. In step 2 each
+lieutenant sends the order they got to the others. In step 3 each lieutenant ends up with v(1)=x,
+v(2)=y, v(3)=z and the majority function majority({x,y,z}). So they each will follow the same order
+irregardless of if the values of x, y, z are equal to one another or not.
+
+Before we can prove that the algorithm OM(m) works for an arbitrary m, we first need to prove the
+following lemma.
+
+Lemma 1. For any m and k, Algorithm OM(m) satisfies IC2 if there are more than 2k+m generals and at
+most k traitors.
+Proof. We will prove this by induction on m. 
+IC2 only cares when the commander is loyal. Using A1, we know that every message is delivered
+correctly. OM(0) works if the commander is loyal, since the lieutenants all receive the order. So
+it holds true for m = 0.
+Now we assume it is true for m-1, m>0, and will prove for m.
+In step 1, the loyal commander sends a value v to all n - 1 lieutenants. Each loyal lieutenant calls
+OM(m-1) with n-1 generals. We know n>2k+1, so we know n-1>2k+m-1 or n-1>2k+(m-1). We use the inductive
+hypothesis and conclude that every loyal lieutenant gets v(j)=v for each loyal Lieutenant j. Since
+n-1>2k+(m-1)>=2k and we know there is at most k traitors, the majority of n-1 lieutenants are loyal.
+So every loyal lieutenant gets v(i)=v for a majority of the n-1 values i. This gives him 
+majority(v(1),...,v(n-1)) in step 2. This proves IC2.
+// TODO: revisit this proof
+
+Theorem 1. For any m, Algorithm OM(m) satisfies conditions IC1 and IC2 if there are more than 3m
+generals and at most m traitors.
+
+// TODO:
+
+----------------------------------------------------------------------------------------------------
+
+SIGNED MESSAGES:  // TODO:
+
+    A4) a) A loyal general's signature cannot be forged, and any alterations of the contents of his
+           signed messages can be detected.
+        b) Anyone can verify the authenticity of a general's signature.
+
+Choice function:
+    1) If the set V consists of the single element v, then choice(V) = v.
+    2) If the set V is the empty set, then the choice is "retreat".
+
+Algorithm SM(m):
+    Initially V(i)={}
+    1) The commander signs and sends his value to every lieutenant.
+    2) For each i,
+        a) If Lieutenant i receives a message from the commander of form v:0 and he has not received
+           any other order, then:
+            i)  he sets V(i) = {v}
+            ii) he sends the message v:0:i to every other lieutenant
+        b) If Lieutenant i receives a message of the form v:0:j(1):...:j(k) and v is not in V(i), then
+            i)  he adds v to V(i)
+            ii) if k < m, then he sends the message v:0:j(1):...:j(k):i to every other lieutenant,
+                except for j(1):...:j(k)
+    3) For each i, when Lieutenant i receives no more messages, he follows the result from choice(V(i))
+
+// TODO: add explanation and diagram for this algorithm
+
+Theorem 2:
+// TODO:
+
+
+----------------------------------------------------------------------------------------------------
+
+MISSING COMMUNICATION PATHS: // TODO:
+
+Definition of regular neighbors, p-regular graph
+// TODO:
+
+Algorithm OM(m,p):
+// TODO:
+
+Lemma 2:
+// TODO:
+
+Theorem 3:
+// TODO:
+
+Theorem 4:
+// TODO:
+
+Corollary:
+// TODO:
+
+----------------------------------------------------------------------------------------------------
+
+APPLICATIONS: // TODO:
+
+- reliable systems
+- block chain
