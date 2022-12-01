@@ -277,7 +277,7 @@ Theorem 2: For any m, Algorithm SM(m) solves the Byzantine Generals Problem if t
 traitors.
 // TODO: maybe add a note here saying we only care when there is at least 2 loyal generals. Since it
          is a dumb problem if there is only 1 or 0 loyal generals.
-         
+
     Proof. 
     We first prove IC2. If the commander is loyal, he sends his signed order v:0 to every lieutenant
     in step 1. This means that every loyal lieutenant will receive the order v in step 2a. According
@@ -299,20 +299,32 @@ traitors.
         1) k < m. In this case, a will send the message v:0:j1:...:jk:a to b, so we know b receives v.
 
         2) k = m. We know the commander is a traitor, which means there is at most m - 1 traitorous
-        lieutenants.
-
-// TODO:
-
+        lieutenants. // TODO: finish this
 
 ----------------------------------------------------------------------------------------------------
 
 MISSING COMMUNICATION PATHS: // TODO:
 
+So far we have assumed that every general could message every other general directly. In the real 
+world that is very rarely the case. Now we will explore extensions of OM(m) and SM(m) that can handle missing communication
+links. To do this we will represent the generals as nodes in a simple, undirected graph and edges
+represent lines of communication. 
+
 Definition of regular neighbors, p-regular graph
 // TODO:
 
-Algorithm OM(m,p):
-// TODO:
+Algorithm OM(m,p): // TODO:
+    0) Choose a regular set N of neighbors of the commander consisting of p lieutenants.
+    1) The commander sends his value to every lieutenant in N.
+    2) For each i in N, let vi be the value Lieutenant i receives from the commander, or else
+       RETREAT if he receives no value. Lieutenant i sends vi to every other lieutenant k as follows:
+       A) If m = 1, then by sending the value along the path γi,k whose existence is guaranteed by
+          part (a)(ii) of Definition 1 (regular set of neighbors).
+       B) If m > 1, then by acting as the commander in the algorithm OM(m-1, p-1), with the graph of
+          generals obtained by removing the original commander from G.
+    3) For each k, and each i in N with i != k, let vi be the value Lieutenant k received from
+       Lieutenant i in step (2), or RETREAT if he received no value. Lieutenant k uses the value
+       majority(vi1,...,vip), where N = {i1,...,ip}.
 
 Lemma 2:
 // TODO:
