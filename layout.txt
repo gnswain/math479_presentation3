@@ -275,7 +275,9 @@ To help determine when a lieutenant will receive no more messages
 
 Theorem 2: For any m, Algorithm SM(m) solves the Byzantine Generals Problem if there are at most m
 traitors.
-
+// TODO: maybe add a note here saying we only care when there is at least 2 loyal generals. Since it
+         is a dumb problem if there is only 1 or 0 loyal generals.
+         
     Proof. 
     We first prove IC2. If the commander is loyal, he sends his signed order v:0 to every lieutenant
     in step 1. This means that every loyal lieutenant will receive the order v in step 2a. According
@@ -284,8 +286,20 @@ traitors.
     Every loyal Lieutenant i will contain the single order v in the set Vi. In step three they will
     follow v in accordance with the first property of the choice function. This proves IC2.
 
+    // TODO: make sure i replaced all i and j with a and b
     Now we prove IC1. We only need to prove IC1 when the commander is a traitor because IC1 follows
-    IC2 when the commander is loyal. 
+    IC2 when the commander is loyal. Two loyal generals, a and b, will follow the same order in step 3 if the
+    set of orders they receive in step 2, Va and Vb, are the same. We need to prove that if a puts an order v
+    in Va then b must put the same order v in Vb. There are two possibilities in step 2. The first
+    option is a receives the message v:0 directly from the commander. He adds the order to Va (2ai)
+    then sends the message v:0:a to every other general, including b. So we know b receives the order v.
+    The other option is if a receives a message in the form of v:0:j1:...:jk. If b is contained in
+    j1...jk, then we know b has already received the order (due to A4). If not, we must consider two
+    cases:
+        1) k < m. In this case, a will send the message v:0:j1:...:jk:a to b, so we know b receives v.
+
+        2) k = m. We know the commander is a traitor, which means there is at most m - 1 traitorous
+        lieutenants.
 
 // TODO:
 
