@@ -48,7 +48,7 @@ commander sending messages to his lieutenants.
 Byzantine Generals Problem. A Commanding general must send an order to his n - 1 lieutenants such that
 
     IC1. All loyal lieutenants obey the same order.
-    IC2. If the commander is loyal, the every loyal lieutenant obeys the order he sends.
+    IC2. If the commander is loyal, then every loyal lieutenant obeys the order he sends.
 
 Conditions IC1 and Condition IC2 are called the interactive consistency conditions. // TODO: define that.
 
@@ -68,29 +68,32 @@ this if there is a single traitor.
 
 Situation 1: The commander is loyal, but one of the lieutenants is a traitor. 
 
-The commander sends out the command "attack" to both lieutenants. Both lieutenants rely the order
-they receive to the other, but since one lieutenant is a traitor, they rely the message "retreat".
-The loyal lieutenant receives the set of orders: {"attack", "retreat"}, there is no way for him
-to decide which is the correct order. 
+    The commander sends out the command "attack" to both lieutenants. Both lieutenants rely the order
+    they receive to the other, but since one lieutenant is a traitor, they rely the message "retreat".
+    The loyal lieutenant receives the set of orders: {"attack", "retreat"}, there is no way for him
+    to decide which is the correct order. 
 
 // TODO: create a diagram for this.
 
 Situation 2: The commander is not loyal, both lieutenants are.
 
-The commander sends "attack" to Lieutenant 1 and "retreat" to Lieutenant 2. Since they are both loyal
-they rely the commands to the other. Lieutenant 1 receives the set of orders: {"attack", "retreat"}.
+    The commander sends "attack" to Lieutenant 1 and "retreat" to Lieutenant 2. Since they are both loyal
+    they rely the commands to the other. Lieutenant 1 receives the set of orders: {"attack", "retreat"}.
 
-Since Lieutenant 1 receives the set of orders: {"attack", "retreat"} in both situations, there is no
-way for him to know who they traitor is, so he follows his commander's orders to attack in both
-situations, regardless of if the commander is a traitor.
+    Since Lieutenant 1 receives the set of orders: {"attack", "retreat"} in both situations, there is no
+    way for him to know who they traitor is, so he follows his commander's orders to attack in both
+    situations, regardless of if the commander is a traitor.
 
-We can make a similar argument that Lieutenant 2 must follow the "retreat" command in the second
-situation. This violates IC1 since the two loyal lieutenants obey different orders.
+    We can make a similar argument that Lieutenant 2 must follow the "retreat" command in the second
+    situation. This violates IC1 since the two loyal lieutenants obey different orders.
 
 // There is a proof for the three-generals problem by Diffie and Hellman
-// Maybe include it
+// Maybe include it (probably don't)
 
-Albanian General's Proof
+Albanian General's Proof (not a rigorous proof, so probably don't want to word it this way)
+
+To avoid confusion, the generals from Diffie and Hellman's result will be referred to as Byzantine
+generals. The generals in our constructed solution will be referred as Albanian generals.
 
 Using the result from Diffie and Hellman we can show that no solution with fewer than 3m+1 generals
 can cope with m traitors, with n > 3 generals. 
@@ -103,8 +106,9 @@ Assume n <= 3m Albanian generals can handle m traitors. We simulate this by allo
 
 Let each of the Byzantine generals simulate at most m Albanian generals. The Byzantine commander
 simulates the Albanian commander and at most m-1 Albanian lieutenants. Each of the Byzantine
-lieutenants at most m Albanian lieutenants. Since each Byzantine general simulates at most m
-Albanian generals, and there can only be one Byzantine traitor, there are at most m Albanian traitors.
+lieutenants at most m Albanian lieutenants. We know that there can be only one Byzantine traitor,
+so it follows that there can be at most m traitorous Albanian generals.
+
 // TODO: finish this
 
 // TODO: Add the part about the approximate.
@@ -165,6 +169,8 @@ Algorithm OM(m), m > 0
            Lieutenant j.
         b) Lieutenant i uses the value majority({v(1),...,v(n-1)}).
 
+// TODO: make a diagram demonstrating this
+
 Let's look at an example with four generals and one traitor, or n = 4 and m = 1. There are two
 situations, one of the lieutenants is a traitor or the commander is a traitor.
 
@@ -172,42 +178,57 @@ situations, one of the lieutenants is a traitor or the commander is a traitor.
 
 Situation 1: Lieutenant 3 is a traitor.
 
-In the first step of the algorithm OM(1), the commander sends the order x to all three lieutenants.
-In the second step, Lieutenant 1 sends the value v to Lieutenant 2 using OM(0). Lieutenant 3 sends
-y to Lieutenant 2. In step 3, Lieutenant 2 has the set of orders v(1)=v(2)=x and v(3)=y. Using
-majority({x, x, y}) = x, Lieutenant 2 follows the order x sent to him by the commander. We can use
-a similar process to find that Lieutenant 1 also follows order x. So both loyal lieutenants followed
-the order of their loyal commander.
+    In the first step of the algorithm OM(1), the commander sends the order x to all three lieutenants.
+    In the second step, Lieutenant 1 sends the value v to Lieutenant 2 using OM(0). Lieutenant 3 sends
+    y to Lieutenant 2. In step 3, Lieutenant 2 has the set of orders v(1)=v(2)=x and v(3)=y. Using
+    majority({x, x, y}) = x, Lieutenant 2 follows the order x sent to him by the commander. We can use
+    a similar process to find that Lieutenant 1 also follows order x. So both loyal lieutenants followed
+    the order of their loyal commander.
 
 Situation 2: The commander is a traitor.
 
-The commander sends the arbitrary orders x, y, z to Lieutenants 1, 2, 3 respectively. In step 2 each
-lieutenant sends the order they got to the others. In step 3 each lieutenant ends up with v(1)=x,
-v(2)=y, v(3)=z and the majority function majority({x,y,z}). So they each will follow the same order
-irregardless of if the values of x, y, z are equal to one another or not.
+    The commander sends the arbitrary orders x, y, z to Lieutenants 1, 2, 3 respectively. In step 2 each
+    lieutenant sends the order they got to the others. In step 3 each lieutenant ends up with v(1)=x,
+    v(2)=y, v(3)=z and the majority function majority({x,y,z}). So they each will follow the same order
+    irregardless of if the values of x, y, z are equal to one another or not.
 
 Before we can prove that the algorithm OM(m) works for an arbitrary m, we first need to prove the
 following lemma.
 
 Lemma 1. For any m and k, Algorithm OM(m) satisfies IC2 if there are more than 2k+m generals and at
 most k traitors.
-Proof. We will prove this by induction on m. 
-IC2 only cares when the commander is loyal. Using A1, we know that every message is delivered
-correctly. OM(0) works if the commander is loyal, since the lieutenants all receive the order. So
-it holds true for m = 0.
-Now we assume it is true for m-1, m>0, and will prove for m.
-In step 1, the loyal commander sends a value v to all n - 1 lieutenants. Each loyal lieutenant calls
-OM(m-1) with n-1 generals. We know n>2k+1, so we know n-1>2k+m-1 or n-1>2k+(m-1). We use the inductive
-hypothesis and conclude that every loyal lieutenant gets v(j)=v for each loyal Lieutenant j. Since
-n-1>2k+(m-1)>=2k and we know there is at most k traitors, the majority of n-1 lieutenants are loyal.
-So every loyal lieutenant gets v(i)=v for a majority of the n-1 values i. This gives him 
-majority(v(1),...,v(n-1)) in step 2. This proves IC2.
+
+    Proof. We will prove this by induction on m. 
+    IC2 only cares when the commander is loyal. Using A1, we know that every message is delivered
+    correctly. OM(0) works if the commander is loyal, since the lieutenants all receive the order. So
+    it holds true for m = 0.
+    Now we assume it is true for m-1, m>0, and will prove for m.
+    In step 1, the loyal commander sends a value v to all n - 1 lieutenants. Each loyal lieutenant calls
+    OM(m-1) with n-1 generals. We know n>2k+1, so we know n-1>2k+m-1 or n-1>2k+(m-1). We use the inductive
+    hypothesis and conclude that every loyal lieutenant gets v(j)=v for each loyal Lieutenant j. Since
+    n-1>2k+(m-1)>=2k and we know there is at most k traitors, the majority of n-1 lieutenants are loyal.
+    So every loyal lieutenant gets v(i)=v for a majority of the n-1 values i. This gives him 
+    majority(v(1),...,v(n-1)) in step 2. This proves IC2.
 // TODO: revisit this proof
 
 Theorem 1. For any m, Algorithm OM(m) satisfies conditions IC1 and IC2 if there are more than 3m
 generals and at most m traitors.
 
-// TODO:
+    Proof. We prove this using induction on m.
+    It is simple to see that OM(0) satisfies IC1 and IC2 if there are no traitors.
+    Assume the theorem is true for OM(m-1) and prove it for OM(m), when m > 0.
+
+        Case 1: The commander is loyal. Use Lemma 1 and set k equal to m. 
+            n > 2k + m => n > 3k.
+            We see that OM(m) satisfies IC2, and IC1 follows if the commander is loyal.
+    
+        Case 2: The commander is a traitor. 
+            We know there is at most m traitors, since one is the commander, there is at most m - 1
+            traitorous lieutenants. We also know that there are more than 3m generals, therefore there
+            are more than 3m-1 lieutenants. 3m-1 > 3(m-1). We can apply the inductive hypothesis and
+            see that O(m-1) meets both IC1 and IC2. Since IC2 is satisfies, we know every loyal
+            lieutenant receives the same set of values v1,...v(n-1). Therefore they come to the same
+            value using the majority(v1,...,v(n-1)) function, proving IC1.
 
 ----------------------------------------------------------------------------------------------------
 
@@ -217,9 +238,22 @@ SIGNED MESSAGES:  // TODO:
            signed messages can be detected.
         b) Anyone can verify the authenticity of a general's signature.
 
+No assumptions are made about traitors' signature. It is possible for traitors to forge another
+traitor's signature and to collude in that manner.
+
+This new algorithm is able to cope with m traitors for any amount of generals. The author notes 
+that it does not make much sense for less than m+2 generals.
+
 Choice function:
     1) If the set V consists of the single element v, then choice(V) = v.
     2) If the set V is the empty set, then the choice is "retreat".
+
+// TODO: maybe explain the choice function more.
+
+In the algorithm we denote the value x signed by General i as x:i. That means v:j:i would be the 
+value v signed by General j and then signed by General i. Each General i maintains a set of properly
+signed orders Vi. A loyal commander should never have more than one element in Vi. Vi is specifically
+the set of orders a general has received, not the set of messages he has received.
 
 Algorithm SM(m):
     Initially V(i)={}
@@ -237,7 +271,22 @@ Algorithm SM(m):
 
 // TODO: add explanation and diagram for this algorithm
 
-Theorem 2:
+To help determine when a lieutenant will receive no more messages
+
+Theorem 2: For any m, Algorithm SM(m) solves the Byzantine Generals Problem if there are at most m
+traitors.
+
+    Proof. 
+    We first prove IC2. If the commander is loyal, he sends his signed order v:0 to every lieutenant
+    in step 1. This means that every loyal lieutenant will receive the order v in step 2a. According
+    to assumption A4, a loyal general's signature cannot be forged. So no traitorous general can
+    forge a message v':0, so a loyal lieutenant cannot receive any additional orders in step 2b. 
+    Every loyal Lieutenant i will contain the single order v in the set Vi. In step three they will
+    follow v in accordance with the first property of the choice function. This proves IC2.
+
+    Now we prove IC1. We only need to prove IC1 when the commander is a traitor because IC1 follows
+    IC2 when the commander is loyal. 
+
 // TODO:
 
 
