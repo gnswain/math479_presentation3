@@ -307,11 +307,24 @@ MISSING COMMUNICATION PATHS: // TODO:
 
 So far we have assumed that every general could message every other general directly. In the real 
 world that is very rarely the case. Now we will explore extensions of OM(m) and SM(m) that can handle missing communication
-links. To do this we will represent the generals as nodes in a simple, undirected graph and edges
-represent lines of communication. 
+links. To do this we will represent the generals as nodes in a simple, undirected graph, G, with the edges
+representing lines of communication. 
 
 Definition of regular neighbors, p-regular graph
-// TODO:
+    Definition 1.
+        a) A set of nodes {i1,...,ip} is said to be a regular set of neighbors of a node i if
+            i) each ij is a neighbor of i, and
+            ii) for any general k different from i, there exists paths γj,k from ij to k not passing
+                through i such that any two different paths γj,k have no node in common other than k.
+        b) The graph G is said to be p-regular if every node has a regular set of neighbors consisting
+           of p distinct nodes.
+
+// TODO: have examples of a p-regular graph and a none p-regular graph
+
+First we will extend OM(m) to an algorithm that solves the Byzantine Generals Problem with m traitors
+if the graph of generals, G, is 3m-regular. As a note, a 3m-regular graph needs to contain at least
+3m+1 nodes. We will define an algorithm OM(m,p) that works for all positive integers m and p and with
+a regular graph G. This algorithm will not work if G is not p-regular.
 
 Algorithm OM(m,p): // TODO:
     0) Choose a regular set N of neighbors of the commander consisting of p lieutenants.
@@ -321,6 +334,7 @@ Algorithm OM(m,p): // TODO:
        A) If m = 1, then by sending the value along the path γi,k whose existence is guaranteed by
           part (a)(ii) of Definition 1 (regular set of neighbors).
        B) If m > 1, then by acting as the commander in the algorithm OM(m-1, p-1), with the graph of
+
           generals obtained by removing the original commander from G.
     3) For each k, and each i in N with i != k, let vi be the value Lieutenant k received from
        Lieutenant i in step (2), or RETREAT if he received no value. Lieutenant k uses the value

@@ -1,0 +1,366 @@
+%\documentclass[varwidth]{standalone}
+\documentclass[10pt]{amsart}
+\usepackage{amscd,amsxtra,color,amsthm}
+
+\usepackage[all]{xy}
+\usepackage{etex}
+\usepackage{pictex}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage[utf8]{inputenc} 
+\usepackage[T1]{fontenc}
+\usepackage[all]{xy}
+\usepackage{etex}
+\usepackage{pictex}
+\usepackage{graphicx}
+\usepackage{mathtools}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+\usepackage{comment}
+
+\textheight=9in \textwidth=6.2in \topmargin=0in
+\oddsidemargin=.15in \evensidemargin=.15in
+
+\begin{document}
+\parskip10pt
+\parindent12pt
+\baselineskip16pt
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Definitions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\G{\widetilde{G}}
+\def\B{\widetilde{B}}
+\def\T{\widetilde{T}}
+\def\C{\mathbb{C}}
+\def\A{\mathbb{A}}
+\def\Z{\mathbb{Z}}
+\def\R{\mathbb{R}}
+\def\Q{\mathbb{Q}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\F{\mathbb{F}}
+\def\I{\mathbb{I}}
+\def\H{\mathcal{H}}
+\def\e{\varepsilon}
+\def\s{\underline s}
+\def\z{\zeta }
+\def\vp{\varpi }
+\def\O{\mathcal O}
+\def\v{\upsilon }
+\def\U{\Upsilon }
+\def\p{\wp }
+\def\p{\mathfrak{p}}
+\def\B{\mathfrak{B}}
+
+\newtheorem{theorem}{Theorem}%[section]
+\newtheorem{lemma}[theorem]{Lemma}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Title Page
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Byzantine Generals Problem}
+
+\author{Graham Swain}
+
+\begin{abstract}
+    In this paper we explore how many guards are needed to guard a museum. We construct a lemma 
+    showing how to triangulate a convex polygon. We then use that and vertex coloring to develop 
+    a proof by induction to find the amount of guards that could sufficiently guard a museum.
+\end{abstract}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Introduction (Definitions)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+The following problem was coined by Victor Klee in 1973. 
+Suppose the manager of a museum wants to place guards to watch every point of the building at all times. 
+Guards are stationed at fixed points, and they have the ability to turn around. 
+How many guards are needed to achieve this? Before we dive into the problem, let's introduce some preliminary definitions and corresponding examples.
+
+\noindent {\bf Definition.} \emph{A polygon is called \textbf{convex} when all of its interior angles 
+are less than $180^\circ$.}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=.25]{figures/convex-polygon.pdf}
+    \includegraphics[scale=.2]{figures/non-convex-polygon.pdf}
+    \caption{Convex polygon on the left, non-convex polygon on the right.}
+\end{figure}
+
+\noindent {\bf Definition.} \emph{A graph is called \textbf{planar} when all of its vertices and edges 
+are contained in a single plane.}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=.25]{figures/planar-graph.pdf}
+    \caption{An example of a planar graph.}
+\end{figure}
+
+\pagebreak
+
+% Needs work
+\noindent {\bf Definition.} \emph{A planar graph $G$ is said to be \textbf{triangulated} when adding 
+another edge to $G$ results in a nonplanar graph.}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=.25]{figures/triangulation.pdf}
+    \caption{An example of a triangulated graph.}
+\end{figure}
+
+Note that this definition is equivalent to \textbf{maximal planar}. Some sources will 
+state a graph is triangulated when no straight edges can be added, an example of that would be a 
+square with a single diagonal; you could draw a new edge connecting the two non-connected 
+vertices, but the edge would not be straight. For this paper, we are only concerned about the 
+interior of the polygons. Therefore, we will consider a polygon triangulated when adding 
+an edge that is contained within the polygon will make it nonplanar.
+
+\noindent {\bf Definition.} \emph{ A proper \textbf{vertex coloring} of a graph $G$ is an assignment of 
+colors to the vertices of $G$ such that no two adjacent vertices receive the same color.}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=.25]{figures/coloring.pdf}
+    \caption{This is a 3-coloring of G.}
+\end{figure}
+
+% \noindent {\bf Definition.} \emph{}
+
+% \pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Introduction (Context)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% transition?
+Coming back to the question we originally introduced, we will imagine the walls of the museum are a polygon consisting of $n$ sides. 
+If the polygon is convex, then we only need one guard to oversee the entire museum. 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=.4]{figures/convex-museum.pdf}
+\end{figure}
+
+However, the walls of the museum can take on the shape of {\bf any} closed polygon. 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=.14]{figures/floor-plan.png}
+    \caption{Floor layout of the second floor of the Met. (From NY Times, 2017)}
+\end{figure}
+
+Let's consider a comb-shaped museum with $n = 3m$ walls.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=.15]{figures/comb-shape.pdf}
+\end{figure}
+
+Notice that point 1 can only be seen by a guard stationed anywhere in the shaded triangle containing the point. 
+This applies to the other points 2, 3,..., $m$. 
+We can see that this requires {\bf at least} $m = \frac{n}{3}$ guards, one for each shaded triangle. 
+
+However, $m$ guards are also sufficient. 
+Since the guards can be placed at the bottom of the triangles, and 
+each guard can watch their own triangle as well as down the hall.
+Thus, the floor of $\frac{n}{3}$ guards are needed for an $n$-walled museum.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Triangulations
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Triangulation}
+
+Before we get into the main proof of our paper, we'd like to go over a proof of a lemma we will 
+use. This lemma proves that there exists a triangulation for any non-convex polygon.
+% \begin{figure}
+%     \centering
+%     \includegraphics[scale=.35]{figures/triangulation-proof-heading.pdf}
+% \end{figure}
+
+We will look at the triangulation of a pentagon to show the basic process of triangulating a polygon.
+Draw a diagonal between any two vertices and then split the pentagon at the diagonal. The result will
+be a triangle and a quadrilateral. We then want to draw a diagonal between any two points of the
+quadrilateral, and then split it on the diagonal. The result will be two more triangles and a 
+triangulated pentagon.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=.17]{figures/triangulate-pentagon-split-fb-dos.pdf}
+    \caption{This shows the process of triangulating a pentagon.}
+\end{figure}
+% look at feedback
+
+\begin{proof} \
+    Let $P$ be a non-convex polygon with $n$ sides. We will be using induction for this proof. 
+    Our base case is $n = 3$, which is a triangle. 
+    For our inductive hypothesis, assume $P$ can be triangulated if $n$ is less than $k$, $k$ being 
+    any integer greater than 3. 
+    We will show that $P$ can be triangulated when $n = k$.
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[scale=.2]{figures/triangulation-proof.pdf}
+    \end{figure}
+
+    \vspace{-20pt}
+    To prove this, we will show that there exists a diagonal that can split $P$ into 
+    two smaller polygons that can be triangulated. 
+    A vertex $A$ is convex if its interior angle is less than $180^\circ$. We know that 
+    the sum of the interior angles of a polygon is $(n-2)180$.  
+    If we imagine that there are $n$ vertices being placed into $n-2$ boxes of $180^\circ$, 
+    then by the pigeonhole principle, there must be a convex vertex $A$. 
+    Looking at the two neighbors $B$ and $C$ of $A$. 
+    If the segment $BC$ is entirely in $P$, then we have our diagonal. 
+    If the segment is not entirely in $P$, then the triangle $ABC$ contains other vertices. 
+
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[scale=.2]{figures/triangulation-proof-dotted.pdf}
+    \end{figure}
+
+    Slide $BC$ towards $A$ until you hit the last vertex $Z$ in $ABC$. 
+    Since $AZ$ is within $P$, we have our diagonal. 
+
+    \begin{figure}[h!]
+        \begin{minipage}{.5\textwidth}
+            \centering
+            \includegraphics[scale=.2]{figures/triangulation-proof-diagonal.pdf}            
+        \end{minipage}%
+        \begin{minipage}{.5\textwidth}
+            \centering
+            \includegraphics[scale=.2]{figures/triangulation-proof-split.pdf}            
+        \end{minipage}
+    \end{figure}
+
+    Now that we have our diagonal we can split $P$ into smaller polygons, both with side $AZ$, 
+    with less than $k$ sides. 
+    By our inductive hypothesis, both of these polygons can be triangulated. 
+    Thus $P$ can be triangulated.
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Theorem
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Art Gallery Theorem}
+
+Now that we know that any polygon can be triangulated we can continue on to our main proof.
+
+\begin{theorem}[Art Gallery Theorem] \
+    For any museum with $n$ walls, the floor of $\frac{n}{3}$ guards suffice.
+\end{theorem}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Proof
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{proof} \
+    Let $P$ be a polygon with $n$ walls. 
+    Because of our lemma, we know we can triangulate $P$. 
+    You can think of $P$ as a planar graph with the corners as vertices and the walls and 
+    diagonals as edges. 
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[scale=.25]{figures/art-gallery-triangulated.pdf}
+    \end{figure}
+
+    We will now show that $P$ is 3-colorable. 
+    For $n=3$, the coloring trivial, as it would be a triangle and  every vertex would be a 
+    different color. 
+    For $n>3$, pick any two vertices $u$ and $v$ connected by a diagonal and split $P$ along $uv$. 
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[scale=.25]{figures/art-gallery-triangulated-fb-1b.pdf}
+    \end{figure}
+
+    This will give us two smaller triangulated graphs that both contain the edge $uv$. 
+    Continue in this manner until only triangles remain. 
+    \begin{figure}[h!]
+        \begin{minipage}{.3\textwidth}
+            \centering
+            \includegraphics[scale=.17]{figures/art-gallery-triangulated-fb-2b.pdf}          
+        \end{minipage}%
+        \begin{minipage}{.3\textwidth}
+            \centering
+            \includegraphics[scale=.17]{figures/art-gallery-triangulated-fb-3b.pdf}          
+        \end{minipage}%
+        \begin{minipage}{.3\textwidth}
+            \centering
+            \includegraphics[scale=.17]{figures/art-gallery-triangulated-fb-4.pdf}           
+        \end{minipage}
+    \end{figure}
+
+    \pagebreak
+
+    We can color each triangle using three colors. 
+    Paste these colorings together to form a 3-coloring of $P$. 
+    \begin{figure}[h!]
+        \begin{minipage}{.5\textwidth}
+            \centering
+            \includegraphics[scale=.25]{figures/art-gallery-triangulated-fb-10.pdf}      
+        \end{minipage}%
+        \begin{minipage}{.5\textwidth}
+            \centering 
+            \includegraphics[scale=.25]{figures/art-gallery-colored.pdf}          
+        \end{minipage}
+    \end{figure}
+
+    We choose one of the three colors. 
+    For every vertex of that color, we assign a guard. 
+    Since every triangle contains that color, we know that each triangle is guarded. 
+    So the whole museum can be guarded by the floor of $\frac{n}{3}$ guards.
+\end{proof}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=.25]{figures/art-gallery-guarded.pdf}
+    % caption
+\end{figure}
+
+In our example we placed our guards at the yellow vertices, which required three guards to guard the
+museum. If we had instead place guards at the green vertices then we would have only needed to use 
+two guards. This helps show that the theorem is only stating how many guards will be sufficient to
+guard the museum, it does not say that $\frac{n}{3}$ will be the minimum number of guards that could
+guard the museum.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Applications ?
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \section{Applications}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Conclusion
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagebreak
+
+\section{Conclusion}
+
+There are several variants to the art gallery theorem. 
+For example, we may only want to guard the walls, since that's where the actual 
+paintings will be, or guards may only be stationed at edges. 
+An unsolved variant states: suppose each guard may patrol one wall of the museum, 
+so they walk along their wall and see anything that can be seen from any point 
+along that wall. How many ``wall guards'' do we then need to keep control?
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=.25]{figures/n4-polygon-fb.pdf}
+\end{figure}
+
+Godfried Toussaint constructed the example of a museum which shows that 
+the floor of $\frac{n}{4}$ guards might be necessary. 
+This polygon has 28 sides, and only requires 7 wall-guards to guard it. 
+The way this is accomplished is by placing a guard at the foot of each leg 
+of the polygon.
+It is conjectured that, besides some small values of n, that the floor of $\frac{n}{4}$ is 
+also sufficient, but there is still no proof for it.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  References
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bibliographystyle{amsplain}
+\begin{thebibliography}{10}
+
+\bibitem{AZ} M. Aigner and G. Ziegler, ``Proofs From THE BOOK,'' $3^{rd}$ edition, Springer-Verlag, 2004. 203-205.
+
+\end{thebibliography}
+
+\end{document}
