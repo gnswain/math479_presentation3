@@ -198,6 +198,7 @@ this if there is even a single traitor.
     \centering
     \includegraphics[scale=.6]{../figures/three_generals_unloyal_commander.pdf}
     \caption{Three General Problem with a disloyal Commander.}
+    \label{fig:3gen_comm}
 \end{figure}
 
 The authors have a formal solution for the three generals problem in their 1980 paper "Reaching 
@@ -279,7 +280,7 @@ The algorithm is recursive, so starts with a base case of OM(0) and uses the maj
 \noindent\emph{Algorithm OM($m$), $m$ > 0}
 \vspace{-10pt}
 \begin{enumerate}[label=\arabic{enumi}.]
-    \item The commander sends his value to every lieutenant.
+    \item The commander sends their value to every lieutenant.
     \item For each $i$,
     \begin{enumerate}[label={\alph*.}]
         \item {
@@ -422,7 +423,7 @@ traitor's signature and to collude in that manner.
 This new algorithm is able to cope with $m$ traitors for any amount of generals, due to the messages
 now being signed. The authors do note that it does not make much sense for less than $m+2$ generals.
 
-In this new algorithm, every when the commander sends an order he signs it. So each lieutenant receives
+In this new algorithm, every when the commander sends an order they sign it. So each lieutenant receives
 an order with the commanders signature. They then add their signature to the message before sending
 it to the other lieutenants. Since each lieutenant will receive multiple messages with orders, we
 need a choice function to decide which order to follow. The only requirements for such a function are:
@@ -438,7 +439,7 @@ implementations. It only matters that all loyal generals use the same decision m
 In the algorithm we denote the value $x$ signed by General $i$ as $x:i$. That means $v:j:i$ would be the 
 value $v$ signed by General $j$ and then signed by General $i$. Each General $i$ maintains a set of properly
 signed orders $V_i$. A loyal commander should never have more than one element in $V_i$. $V_i$ is specifically
-the set of orders a general has received, not the set of messages he has received.
+the set of orders a general has received, not the set of messages they have received.
 
 \noindent\emph{Algorithm SM($m$), $m$ > 0} \\
 Initially $V_i=\{\}$
@@ -459,36 +460,170 @@ Initially $V_i=\{\}$
             If Lieutenant $i$ receives a message of the form $v:0:j_1:...:j_k$ and $v$ is not in $V_i$, 
             then:
             \begin{enumerate}[label=\roman*.]
-                \item he adds $v$ to $V_i$.
+                \item they add $v$ to $V_i$.
                 \item {
-                    if $k < m$, then he sends the message $v:0:j_1:...:j_k:i$ to every other lieutenant,
+                    if $k < m$, then they send the message $v:0:j_1:...:j_k:i$ to every other lieutenant,
                     except for $j_1,...,j_k$.
                 }
             \end{enumerate}
         }
         \item {
-            For each $i$, when Lieutenant $i$ receives no more messages, he follows the result from 
+            For each $i$, when Lieutenant $i$ receives no more messages, they follow the result from 
             $choice(V_i)$.
         }
     \end{enumerate}
     
 \end{enumerate}
 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=.55]{../figures/signed_messages_disloyal_commander.pdf}
+    \caption{SM(1) with a disloyal lieutenant.}
+    \label{fig:signed}
+\end{figure}
+
+We can look at Figure \ref{fig:signed} to see how signed messages can make the problem
+easier. The traitorous commander sends conflicting commands to their two lieutenants. Since the lieutenants
+are loyal, they rely the message they receive, adding their own signatures. In step (3) the lieutenants
+have the sets of orders $V_1=V_2={ATTACK, RETREAT}$. The difference between this and Figure \ref{fig:3gen_comm}
+is the lieutenants know that the commander sent different commands, so they are the traitor.
+
+\pagebreak
+
+Now to prove that SM($m$) offers a valid solution.
+
+\begin{theorem}
+    \label{theorem2}
+    For any $m$, Algorithm SM($m$) solves the Byzantine Generals Problem if there are at most $m$
+    traitors.
+\end{theorem}
+
+\begin{proof}
+    We first prove IC2. If the commander is loyal, they sends their signed order $v:0$ to every lieutenant
+    in step (1). This means that every loyal lieutenant will receive the order $v$ in step (2a). According
+    to assumption A4, a loyal general's signature cannot be forged. So no traitorous general can
+    forge a message $v':0$, so a loyal lieutenant cannot receive any additional orders in step (2b). 
+    Every loyal Lieutenant $i$ will contain the single order $v$ in the set $_Vi$. In step three they will
+    follow $v$ in accordance with the first property of the choice function. This proves IC2.
+
+    Now we prove IC1. We only need to prove IC1 when the commander is a traitor because IC1 follows
+    IC2 when the commander is loyal. Two loyal generals, $a$ and $b$, will follow the same order in step (3) if the
+    set of orders they receive in step (2), $V_a$ and $V_b$, are the same. We need to prove that if $a$ puts an order $v$
+    in $V_a$ then $b$ must put the same order $v$ in $V_b$. There are two possibilities in step (2). The first
+    option is a receives the message $v:0$ directly from the commander. They adds the order to $V_a$, step (2ai),
+    then sends the message $v:0:a$ to every other general, including $b$. So we know $b$ receives the order $v$.
+    The other option is if $a$ receives a message in the form of $v:0:j_1:...:j_k$. If $b$ is contained in
+    $j_1...j_k$, then we know $b$ has already received the order (due to A4). If not, we must consider two
+    cases:
+    \begin{enumerate}[label=\arabic{enumi}.]
+        \item $k<m$. In this case, a will send the message $v:0:j_1:...:j_k:a$ to $b$, so we know $b$ receives $v$.
+        \item {
+            $k = m$. We know the commander is a traitor, which means there is at most $m - 1$ traitorous
+            lieutenants. This means at least one of the lieutenants $j_1,...,j_m$ is loyal. Since
+            loyal lieutenants follow the algorithm, we know that the loyal lieutenant must have sent
+            the value $v$ to $j$ when they had first received it.
+        }
+    \end{enumerate}
+    This proves that SM($m$) solves the Byzantine Generals Problem.
+\end{proof}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  Missing Communication Paths
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Missing Communication Paths}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%  Applications ?
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \section{Applications}
+So far we have assumed that every general could message every other general directly. In the real 
+world that is very rarely the case. Now we will explore extensions of OM($m$) and SM($m$) that can handle missing communication
+links. To do this we will represent the generals as nodes in a simple, undirected graph, $G$, with the edges
+representing lines of communication. 
+
+To explore this new twist on the problem, we first need some definitions.
+
+\noindent {\bf Definition.} { 
+    A set of nodes $\{i_1,...,i_p\}$ is said to be a \textbf{regular set of neighbors} of a node $i$ if 
+    \vspace{-10pt}
+    \begin{enumerate}[label=\roman*.]
+        \item each $i_j$ is a neighbor of $i$, and
+        \item {
+            for any general $k$ different from $i$, there exists paths $\gamma_{j,k}$ from $i_j$ to $k$ not passing
+            through $i$ such that any two different paths $\gamma_{j,k}$ have no node in common other than $k$.
+        }
+    \end{enumerate}
+}
+
+\noindent {\bf Definition.} { 
+    The graph $G$ is said to be \textbf{p-regular} if every node has a regular set of neighbors 
+    consisting of $p$ distinct nodes.
+}
+
+\begin{figure}[h!]
+    \begin{minipage}{.5\textwidth}
+        \centering
+        \includegraphics[scale=.2]{../figures/3-regular_graph.pdf}   
+        \caption{Example of a 3-regular graph.}         
+    \end{minipage}%
+    \begin{minipage}{.5\textwidth}
+        \centering
+        \includegraphics[scale=.2]{../figures/non-regular_graph.pdf}     
+        \caption{A non p-regular graph.}       
+    \end{minipage}
+\end{figure}
+
+We are not going to go as in-depth as we did for the completely connected examples, but we will show
+how we can extend OM($m$) to an algorithm that solves the Byzantine Generals Problem with $m $traitors
+if the graph of generals, $G$, is $3m$-regular. As a note, a $3m$-regular graph needs to contain at least
+$3m+1$ nodes. We will define an algorithm OM($m,p$) that works for all positive integers $m$ and $p$ and with
+a regular graph $G$. This algorithm will not work if $G$ is not p-regular.
+
+\noindent\emph{Algorithm OM($m,p$)} \\
+\vspace{-10pt}
+\begin{enumerate}[label=\arabic{enumi}.]
+    \item Choose a regular set $N$ of neighbors of the commander consisting of $p$ lieutenants.
+    \item The commander sends their value to every lieutenant in $N$.
+    \item {
+        For each $i$ in $N$, let $v_i$ be the value Lieutenant $i$ receives from the commander, or else
+        RETREAT if they receives no value. Lieutenant $i$ sends $v_i$ to every other lieutenant $k$ as follows:
+        \begin{enumerate}[label={\alph*.}]
+               \item {
+                    If $m = 1$, then by sending the value along the path $\gamma_{i,k}$ whose existence 
+                    is guaranteed by the definition of regular set of neighbors.
+            }
+            \item {
+                    If $m>1$, then by acting as the commander in the algorithm OM($m-1, p-1$), with the 
+                    graph of generals obtained by removing the original commander from $G$.
+            }
+        \end{enumerate}
+    }
+    \item {
+        For each $k$, and each $i$ in $N$ with $i \neq k$, let $v_i$ be the value Lieutenant $k$ received from
+        Lieutenant $i$ in step (2), or RETREAT if they received no value. Lieutenant $k$ uses the value
+        $majority(v_{i1},...,v_{ip})$, where $N = \{i_1,...,i_p\}$.
+    }
+\end{enumerate}
+
+In the paper the authors go into more detail about this algorithm as well as a way to extend SM($m$)
+to handle weakly connected graphs. This is beyond the scope of this paper, as we are focusing on
+the Byzantine Generals Problem for completely connected graph. I just wanted to show that the problem
+increases in complexity when each general cannot communicate directly with one another. I also wanted
+to show an example of how one could approach that problem.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  Conclusion
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 
+The Byzantine Generals Problem is important in discussing the reliability of computing systems,
+especially when it comes to distributed systems. In the real world nothing is perfect, so systems
+but be able to handle parts failing, or traitorous generals. A modern application of the problem
+is block-chain and Bitcoin. The entire point of Bitcoin is to be decentralized and still reliable.
+Whenever a new coin is mined or a transaction is made, other nodes in the Bitcoin network must be
+informed and agree that it was legit transaction. If a small number of bad actors were able to
+influence whether or not transactions were accepted, then it would lose any credibility it has as a
+currency.
+
+Crypto-currency is not the only application of the Byzantine Generals Problem, practically every
+network is an example of it in action. Whenever a network cannot afford downtime, the Byzantine
+Generals Problem is a fundamental consideration during creation of that network. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  References
