@@ -87,7 +87,7 @@ Situation 2: The commander is not loyal, both lieutenants are.
     We can make a similar argument that Lieutenant 2 must follow the "retreat" command in the second
     situation. This violates IC1 since the two loyal lieutenants obey different orders.
 
-// There is a proof for the three-generals problem by Diffie and Hellman
+// There is a proof for the three-generals problem by Diffie and Hellman (it's not Diffie-Hellman)
 // Maybe include it (probably don't)
 
 Albanian General's Proof (not a rigorous proof, so probably don't want to word it this way)
@@ -127,7 +127,7 @@ We make three assumptions for oral messages:
     A2) The receiver of a message knows who sent it.
     A3) The absence of a message can be detected.
 
-This assumptions each help prevent foul play by traitorous generals. A1 prevents generals from
+These assumptions each help prevent foul play by traitorous generals. A1 prevents generals from
 stopping messages from being received. A2 make it to where a general cannot impersonate another.
 A3 stops traitors who try and prevent a decision by not sending messages.
 

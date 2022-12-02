@@ -17,6 +17,7 @@
 \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
 \DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
 \usepackage{comment}
+\usepackage{enumitem}
 
 \textheight=9in \textwidth=6.2in \topmargin=0in
 \oddsidemargin=.15in \evensidemargin=.15in
@@ -54,6 +55,7 @@
 \def\p{\mathfrak{p}}
 \def\B{\mathfrak{B}}
 
+
 \newtheorem{theorem}{Theorem}%[section]
 \newtheorem{lemma}[theorem]{Lemma}
 
@@ -66,291 +68,427 @@
 \author{Graham Swain}
 
 \begin{abstract}
-    In this paper we explore how many guards are needed to guard a museum. We construct a lemma 
-    showing how to triangulate a convex polygon. We then use that and vertex coloring to develop 
-    a proof by induction to find the amount of guards that could sufficiently guard a museum.
+    In this paper we explore the Byzantine Generals problem; an abstraction used to discuss the
+    reliability of computing systems.
 \end{abstract}
 
 \maketitle
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%  Introduction (Definitions)
+%%  Introduction 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Introduction}
-The following problem was coined by Victor Klee in 1973. 
-Suppose the manager of a museum wants to place guards to watch every point of the building at all times. 
-Guards are stationed at fixed points, and they have the ability to turn around. 
-How many guards are needed to achieve this? Before we dive into the problem, let's introduce some preliminary definitions and corresponding examples.
 
-\noindent {\bf Definition.} \emph{A polygon is called \textbf{convex} when all of its interior angles 
-are less than $180^\circ$.}
+The Byzantine Generals Problem is a classic example that is used to abstract discussions of
+computing systems. For a computing system to be reliable it must be able to deal with one or more
+of its components failing. In the Byzantine Generals Problem each component is represented as a
+general, the components that failed are traitorous generals. We will mostly be exploring when all the
+components, or generals, have a direct line of communication, but we will briefly discuss about when
+that is not the case.
+
+The basis of the problem is we imagine that there are multiple divisions of the Byzantine army sieging
+a city, each division led by a generals. The generals are only able to communicate by messengers. The
+general needs to decide and agree on a plan. Unfortunately, some of the generals could be traitors,
+trying to prevent the loyal generals from reaching an agreement. So the generals need  to have an
+algorithm to guarantee that:
+
+\begin{enumerate}[label={\Alph*.}]
+    \item All loyal generals decide upon the same plan of action.
+    \item A small number of traitors cannot cause the loyal generals to adopt a bad plan.
+\end{enumerate}
+
+The goal is to ensure that the loyal generals are able to agree on a reasonable plan, regardless
+of traitorous generals. It is hard to quantify exactly what a ``bad'' plan is, but we do not have to
+for our algorithm. How the generals reach a decision is more important. Let there be $n$ generals
+and $v_i$ is the information communicated by the $i^{th}$ general. Each general has to use some method
+of taking all of the plans communicated to them, $v_1,...,v_n$, and make a decision based off of them.
+Having all of the generals use the same method of decision making would achieve Condition A.
+
+Condition B can be met by using a robust decision making method. To simplify the problem we say that
+the message can only be one of two orders ``ATTACK'' or ``RETREAT'', making $v_i$ General's $i$
+opinion on which is the best option. Each general can take a majority vote of $v_1,...,v_n$ and let
+whichever option wins be the ``best'' decision. This method only lets a small number of traitors
+affect the result if the loyal generals are split fairly evenly between the two options, in which
+case neither option could be deemed ``bad''. 
+
+\pagebreak
+
+To help ensure that Condition A and Condition B are met, we need to meet two other conditions:
+
+\begin{enumerate}[label={\arabic{enumi}.}]
+    \item Every loyal general must obtain the same information $v_1,...,v_n$.
+    \item {
+        If the $i^{th}$ general is loyal, then the value that they sends must be used by every loyal 
+        general as the value of $v_i$.
+    }
+\end{enumerate}
+
+\noindent Condition 1 could also be written as:
+\begin{enumerate}[label={1$^{\prime}$.}]
+    \item For every $i$, any two loyal generals use the same value of $v_i$.
+\end{enumerate}
+
+These are important because a loyal general cannot take a value $v_i$ at face value, because a
+traitorous general could send different values of $v_i$ to different generals. Even though the
+generals cannot necessarily trust every message, we must find a way to guarantee that loyal generals
+use the values sent to them by other loyal generals.
+
+Since Condition 1$^\prime$ and Condition 2 are both contingent on a single $v_i$ sent by the $i^{th}$
+general, we can focus on how a single general sends values to others. We phrase this problem by 
+referring to a commander sending messages to their lieutenants.
+
+\emph{Byzantine Generals Problem.} A Commanding general must send an order to their $n - 1$ 
+lieutenants such that:
+
+\begin{enumerate}[label={IC\arabic{enumi}.}]
+    \item All loyal lieutenants obey the same order.
+    \item If the commander is loyal, then every loyal lieutenant obeys the order they sends.
+\end{enumerate}
+
+Conditions IC1 and Condition IC2 are called the interactive consistency conditions. If the commander
+is loyal, then IC1 follows IC2. However, the commander can be a traitor.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Three Generals (Impossibility Result)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Three Generals}
+
+When sending only oral messages, at least two thirds of the lieutenants must be loyal for any
+solution to work. The distinction of oral message is important, as it means that the contents of a
+message is completely up to sender. So a traitorous sender can send any message they want.
+
+We will look at the simplest form of this problem, where there are three generals (one commander and
+two lieutenants). There are two possible orders: "ATTACK" or "RETREAT". No solution can exist for
+this if there is even a single traitor.
+
+\noindent \emph{Situation 1.} The commander is loyal, but one of the lieutenants is a traitor.
+
+\begin{minipage}{.95\textwidth}%
+    The commander sends out the command ATTACK to both lieutenants. Both lieutenants rely the order
+    they receive to the other, but since one lieutenant is a traitor, they rely the message RETREAT.
+    The loyal lieutenant receives the set of orders: {ATTACK, RETREAT}, there is no way for him
+    to decide which is the correct order. 
+\end{minipage}%
+
+\pagebreak
+
 \begin{figure}[h!]
     \centering
-    \includegraphics[scale=.25]{figures/convex-polygon.pdf}
-    \includegraphics[scale=.2]{figures/non-convex-polygon.pdf}
-    \caption{Convex polygon on the left, non-convex polygon on the right.}
+    \includegraphics[scale=.6]{../figures/three_generals_loyal_commander.pdf}
+    \caption{Three General Problem with a loyal Commander.}
 \end{figure}
 
-\noindent {\bf Definition.} \emph{A graph is called \textbf{planar} when all of its vertices and edges 
-are contained in a single plane.}
+
+\noindent \emph{Situation 2.} The commander is not loyal, both lieutenants are.
+
+\begin{minipage}{.95\textwidth}%
+    The commander sends ATTACK to Lieutenant 1 and RETREAT to Lieutenant 2. Since they are both loyal
+    they rely the commands to each other. Lieutenant 1 receives the set of orders: {ATTACK, RETREAT}.
+
+    Since Lieutenant 1 receives the set of orders: {ATTACK, RETREAT} in both situations, there is no
+    way for them to know who they traitor is, so they follows their commander's orders to attack in 
+    both situations, regardless of if the commander is a traitor.
+
+    We can make a similar argument that Lieutenant 2 must follow the RETREAT command in the second
+    situation. This violates IC1 since the two loyal lieutenants obey different orders. 
+\end{minipage}%
+
 \begin{figure}[h!]
     \centering
-    \includegraphics[scale=.25]{figures/planar-graph.pdf}
-    \caption{An example of a planar graph.}
+    \includegraphics[scale=.6]{../figures/three_generals_unloyal_commander.pdf}
+    \caption{Three General Problem with a disloyal Commander.}
+\end{figure}
+
+The authors have a formal solution for the three generals problem in their 1980 paper "Reaching 
+Agreement in the Presence of Faults" if you want to read more about it. For the purposes of this
+paper it is only important to know that no solution exists for three generals if there is a single
+traitor.
+
+Using the result that a single traitor can disrupt the the three generals problem, we can show that
+no solution exists with less than $3m+1$ generals and $m$ traitors. To help differentiate between
+the problems, the generals from the three generals problem will be referred to as Byzantine generals
+and the generals from the assumed solution will be referred to as Albanian generals.
+
+\begin{proof}
+    We want to prove that no solution exists with $n < 3m + 1$ generals with $m$ traitors and $n > 3$.
+    We will prove this by contradiction. 
+
+    Assume that a solution exists for $3m$ or less Albanian generals. We will show a solution exits
+    for three Byzantine generals with a single traitor. Each Byzantine general represents at most 
+    $m$ Albanian generals. Since the Albanian commander needs to be represented as well, the
+    Byzantine commander represents the Albanian commander as well as at most $m-1$ Albanian lieutenants.
+    We know that there is a single Byzantine traitor. Since each Byzantine general represents at
+    most $m$ Albanian generals, we know there is at most $m$ Albanian traitors. The assumed solution
+    means that IC1 and IC2 is true for the Albanian generals. Since each Albanian general is 
+    represented by a Byzantine general, then IC1 and IC2 must also be true for the Byzantine generals,
+    which we know is impossible, forming a contradiction.
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Oral Solution 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Oral Solution}
+
+The above section shows that we need at least $3m+1$ generals to solve the Byzantine Generals Problem
+using oral messages, with m traitors.  In this section we will create an algorithm that will work for
+$3m+1$ or more generals. We make three assumptions to define an oral message:
+\begin{enumerate}[label={A\arabic{enumi}.}]
+    \item Every message that is sent is delivered correctly.
+    \item The receiver of a message knows who sent it.
+    \item The absence of a message can be detected.
+\end{enumerate}
+
+These assumptions each help prevent foul play by traitorous generals. A1 prevents traitor from
+stopping messages from being received. A2 make it to where a traitor cannot impersonate another.
+A3 stops traitors who try and prevent a decision from being made by not sending messages.
+
+For this problem we assume that every general is able to send a message to every other general. That
+is often not the cased and will be discussed in a later section. We also assume that every loyal 
+general completes their algorithm. In the case of a traitorous general who does not send any orders
+at all, we assume that lieutenants default to the RETREAT order.
+
+We will define an algorithm for oral messages OM($m$), for all nonnegative integers $m$. In this algorithm
+a commander sends an order to $n-1$ lieutenants. OM($m$) will solve the Byzantine Generals Problem for
+$3m+1$ more generals when there is at most $m$ traitors.
+
+As stated above, when a general receives a message, or a value, from a general, we denote it as $v_i$
+for the $i^{th}$ general. Whenever a general has a set of all the messages, $v_i,...,v_n$, they use a 
+majority function majority($v_i,...,v_n$) = $v$, $v$ being the decision the lieutenant comes too. Two choices 
+for deciding the majority listed in the paper are:
+\begin{enumerate}[label={\arabic{enumi}.}]
+    \item {
+        The majority value among the $v_i$ (the value that occurs the most) if one exists, or default 
+        to the value RETREAT.
+    }
+    \item The median value of the $v_i$, if the set is ordered.
+\end{enumerate}
+
+The algorithm is recursive, so starts with a base case of OM(0) and uses the majority function.
+
+\noindent\emph{Algorithm OM(0)}
+\vspace{-10pt}
+\begin{enumerate}[label=\arabic{enumi}.]
+    \item The commander sends their value to every lieutenant.
+    \item {
+        Each lieutenant uses the value they received from the commander. If they received no value, 
+        default to RETREAT.
+    }
+\end{enumerate}
+
+\noindent\emph{Algorithm OM($m$), $m$ > 0}
+\vspace{-10pt}
+\begin{enumerate}[label=\arabic{enumi}.]
+    \item The commander sends his value to every lieutenant.
+    \item For each $i$,
+    \begin{enumerate}[label={\alph*.}]
+        \item {
+            Lieutenant $i$ receives a value $v_i$ from the commander. Default to RETREAT if they receive
+            no value.
+        }
+        \item {
+            Lieutenant $i$ acts as the commander in OM($m-1$) to send the message to each of the remaining
+            $n-2$ lieutenants.
+        }
+    \end{enumerate}
+    \item For each $i$, and each $j$ not equal to $i$,
+    \begin{enumerate}[label={\alph*.}]
+        \item {
+            let $v_j$ be the value Lieutenant $i$ received from Lieutenant $j$ in step (2b). Default to 
+            RETREAT if Lieutenant $i$ received no value from Lieutenant $j$.
+        }
+        \item Lieutenant $i$ uses the value $majority(v_1,...,v_{n-1})$.
+    \end{enumerate}  
+\end{enumerate}
+
+Let's look at an example with four generals and one traitor, or $n=4$ and $m=1$. There are two
+situations, where one of the lieutenants is a traitor or where the commander is a traitor.
+
+\noindent \emph{Situation 1.} Lieutenant 3 is a traitor.
+
+\begin{minipage}{.95\textwidth}%
+    In the first step of the algorithm OM(1), the commander sends the order $x$ to all three lieutenants.
+    In the second step, Lieutenant 1 sends the value $x$ to Lieutenant 2 using OM(0). Lieutenant 3 sends
+    $y$ to Lieutenant 2. In step 3, Lieutenant 2 has the set of orders $v_1=v_2=x$ and $v_3=y$. Using
+    $majority(x, x, y) = x$, Lieutenant 2 follows the order $x$ sent to him by the commander. We can use
+    a similar process to find that Lieutenant 1 also follows order $x$. So both loyal lieutenants followed
+    the order of their loyal commander. This satisfies IC1 and IC2.
+\end{minipage}%
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=.4]{../figures/oral_messages_OM(1)_loyal_commander.pdf}
+    \caption{OM(1) with a disloyal lieutenant.}
 \end{figure}
 
 \pagebreak
 
-% Needs work
-\noindent {\bf Definition.} \emph{A planar graph $G$ is said to be \textbf{triangulated} when adding 
-another edge to $G$ results in a nonplanar graph.}
+\noindent \emph{Situation 2.} The commander is a traitor. 
+
+\begin{minipage}{.95\textwidth}%
+    The commander sends the arbitrary orders $x$, $y$, $z$ to Lieutenants 1, 2, 3 respectively. In step 2 each
+    lieutenant sends the order they got to the others. In step 3 each lieutenant ends up with $v_1=x$,
+    $v_2=y$, $v_3=z$ and the majority function $majority(x,y,z)$. So they each will follow the same order
+    regardless of if the values of $x$, $y$, $z$ are equal to one another or not. This satisfies IC1.
+\end{minipage}%
+
 \begin{figure}[h!]
     \centering
-    \includegraphics[scale=.25]{figures/triangulation.pdf}
-    \caption{An example of a triangulated graph.}
+    \includegraphics[scale=.4]{../figures/oral_messages_OM(1)_unloyal_commander.pdf}
+    \caption{OM(1) with a disloyal lieutenant.}
 \end{figure}
 
-Note that this definition is equivalent to \textbf{maximal planar}. Some sources will 
-state a graph is triangulated when no straight edges can be added, an example of that would be a 
-square with a single diagonal; you could draw a new edge connecting the two non-connected 
-vertices, but the edge would not be straight. For this paper, we are only concerned about the 
-interior of the polygons. Therefore, we will consider a polygon triangulated when adding 
-an edge that is contained within the polygon will make it nonplanar.
+Before we can prove that the algorithm OM($m$) works for an arbitrary $m$, we first need to prove the
+following lemma.
 
-\noindent {\bf Definition.} \emph{ A proper \textbf{vertex coloring} of a graph $G$ is an assignment of 
-colors to the vertices of $G$ such that no two adjacent vertices receive the same color.}
-\begin{figure}[h!]
-    \centering
-    \includegraphics[scale=.25]{figures/coloring.pdf}
-    \caption{This is a 3-coloring of G.}
-\end{figure}
+\begin{lemma}
+    \label{lemma1}
+    For any $m$ and $k$, Algorithm OM($m$) satisfies IC2 if there are more than $2k+m$ generals and at
+    most $k$ traitors.
+\end{lemma}
 
-% \noindent {\bf Definition.} \emph{}
-
-% \pagebreak
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%  Introduction (Context)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% transition?
-Coming back to the question we originally introduced, we will imagine the walls of the museum are a polygon consisting of $n$ sides. 
-If the polygon is convex, then we only need one guard to oversee the entire museum. 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[scale=.4]{figures/convex-museum.pdf}
-\end{figure}
-
-However, the walls of the museum can take on the shape of {\bf any} closed polygon. 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[scale=.14]{figures/floor-plan.png}
-    \caption{Floor layout of the second floor of the Met. (From NY Times, 2017)}
-\end{figure}
-
-Let's consider a comb-shaped museum with $n = 3m$ walls.
-\begin{figure}[h!]
-    \centering
-    \includegraphics[scale=.15]{figures/comb-shape.pdf}
-\end{figure}
-
-Notice that point 1 can only be seen by a guard stationed anywhere in the shaded triangle containing the point. 
-This applies to the other points 2, 3,..., $m$. 
-We can see that this requires {\bf at least} $m = \frac{n}{3}$ guards, one for each shaded triangle. 
-
-However, $m$ guards are also sufficient. 
-Since the guards can be placed at the bottom of the triangles, and 
-each guard can watch their own triangle as well as down the hall.
-Thus, the floor of $\frac{n}{3}$ guards are needed for an $n$-walled museum.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%  Triangulations
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Triangulation}
-
-Before we get into the main proof of our paper, we'd like to go over a proof of a lemma we will 
-use. This lemma proves that there exists a triangulation for any non-convex polygon.
-% \begin{figure}
-%     \centering
-%     \includegraphics[scale=.35]{figures/triangulation-proof-heading.pdf}
-% \end{figure}
-
-We will look at the triangulation of a pentagon to show the basic process of triangulating a polygon.
-Draw a diagonal between any two vertices and then split the pentagon at the diagonal. The result will
-be a triangle and a quadrilateral. We then want to draw a diagonal between any two points of the
-quadrilateral, and then split it on the diagonal. The result will be two more triangles and a 
-triangulated pentagon.
-\begin{figure}[h!]
-    \centering
-    \includegraphics[scale=.17]{figures/triangulate-pentagon-split-fb-dos.pdf}
-    \caption{This shows the process of triangulating a pentagon.}
-\end{figure}
-% look at feedback
-
-\begin{proof} \
-    Let $P$ be a non-convex polygon with $n$ sides. We will be using induction for this proof. 
-    Our base case is $n = 3$, which is a triangle. 
-    For our inductive hypothesis, assume $P$ can be triangulated if $n$ is less than $k$, $k$ being 
-    any integer greater than 3. 
-    We will show that $P$ can be triangulated when $n = k$.
-    \begin{figure}[h!]
-        \centering
-        \includegraphics[scale=.2]{figures/triangulation-proof.pdf}
-    \end{figure}
-
-    \vspace{-20pt}
-    To prove this, we will show that there exists a diagonal that can split $P$ into 
-    two smaller polygons that can be triangulated. 
-    A vertex $A$ is convex if its interior angle is less than $180^\circ$. We know that 
-    the sum of the interior angles of a polygon is $(n-2)180$.  
-    If we imagine that there are $n$ vertices being placed into $n-2$ boxes of $180^\circ$, 
-    then by the pigeonhole principle, there must be a convex vertex $A$. 
-    Looking at the two neighbors $B$ and $C$ of $A$. 
-    If the segment $BC$ is entirely in $P$, then we have our diagonal. 
-    If the segment is not entirely in $P$, then the triangle $ABC$ contains other vertices. 
-
-    \begin{figure}[h!]
-        \centering
-        \includegraphics[scale=.2]{figures/triangulation-proof-dotted.pdf}
-    \end{figure}
-
-    Slide $BC$ towards $A$ until you hit the last vertex $Z$ in $ABC$. 
-    Since $AZ$ is within $P$, we have our diagonal. 
-
-    \begin{figure}[h!]
-        \begin{minipage}{.5\textwidth}
-            \centering
-            \includegraphics[scale=.2]{figures/triangulation-proof-diagonal.pdf}            
-        \end{minipage}%
-        \begin{minipage}{.5\textwidth}
-            \centering
-            \includegraphics[scale=.2]{figures/triangulation-proof-split.pdf}            
-        \end{minipage}
-    \end{figure}
-
-    Now that we have our diagonal we can split $P$ into smaller polygons, both with side $AZ$, 
-    with less than $k$ sides. 
-    By our inductive hypothesis, both of these polygons can be triangulated. 
-    Thus $P$ can be triangulated.
+\begin{proof}
+    We will prove this by induction on m. \\
+    IC2 only cares when the commander is loyal. Using A1, we know that every message is delivered
+    correctly. OM(0) works if the commander is loyal, since the lieutenants all receive the order. So
+    it holds true for $m$ = 0. \\
+    Now we assume it is true for $m-1$, $m>0$, and will prove for $m$. \\
+    In step 1, the loyal commander sends a value v to all $n-1$ lieutenants. Each loyal lieutenant calls
+    OM($m-1$) with $n-1$ generals. We know $n>2k+1$, so we know $n-1>2k+m-1$ or $n-1>2k+(m-1)$. We use the inductive
+    hypothesis and conclude that every loyal lieutenant gets $v_j=v$ for each loyal Lieutenant $j$. Since
+    $n-1>2k+(m-1)\geq2k$ and we know there is at most $k$ traitors, the majority of $n-1$ lieutenants are loyal.
+    So every loyal lieutenant gets $v_i=v$ for a majority of the $n-1$ values $i$. This gives him 
+    $majority(v_1,...,v_{n-1})$ in step 2. This proves IC2.
 \end{proof}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%  Theorem
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\section{Art Gallery Theorem}
-
-Now that we know that any polygon can be triangulated we can continue on to our main proof.
-
-\begin{theorem}[Art Gallery Theorem] \
-    For any museum with $n$ walls, the floor of $\frac{n}{3}$ guards suffice.
+\begin{theorem}
+    \label{theorem1}
+    For any $m$, Algorithm OM($m$) satisfies conditions IC1 and IC2 if there are more than $3m$ generals 
+    and at most $m$ traitors.
 \end{theorem}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%  Proof
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{proof}
+    We prove this using induction on m. \\
+    It is simple to see that OM(0) satisfies IC1 and IC2 if there are no traitors.
+    Assume the theorem is true for OM($m-1$) and prove it for OM($m$), when $m>0$.
 
-\begin{proof} \
-    Let $P$ be a polygon with $n$ walls. 
-    Because of our lemma, we know we can triangulate $P$. 
-    You can think of $P$ as a planar graph with the corners as vertices and the walls and 
-    diagonals as edges. 
-    \begin{figure}[h!]
-        \centering
-        \includegraphics[scale=.25]{figures/art-gallery-triangulated.pdf}
-    \end{figure}
+    \begin{minipage}{.8\textwidth}%
+        \textbf{Case 1.} The commander is loyal. \\
+        Use Lemma 1 and set $k$ equal to $m$.
+        \[ n > 2k + m \] 
+        \[ n > 3k. \]
+        We see that OM($m$) satisfies IC2, and IC1 follows if the commander is loyal.
+    \end{minipage}%
 
-    We will now show that $P$ is 3-colorable. 
-    For $n=3$, the coloring trivial, as it would be a triangle and  every vertex would be a 
-    different color. 
-    For $n>3$, pick any two vertices $u$ and $v$ connected by a diagonal and split $P$ along $uv$. 
-    \begin{figure}[h!]
-        \centering
-        \includegraphics[scale=.25]{figures/art-gallery-triangulated-fb-1b.pdf}
-    \end{figure}
+    \begin{minipage}{.8\textwidth}%
+        \textbf{Case 2.} The commander is a traitor. \\
+        We know there is at most $m$ traitors, since one is the commander, there is at most $m-1$
+        traitorous lieutenants. We also know that there are more than $3m$ generals, therefore there
+        are more than $3m-1$ lieutenants. $3m-1 > 3(m-1)$. We can apply the inductive hypothesis and
+        see that O($m-1$) meets both IC1 and IC2. Since IC2 is satisfied, we know every loyal
+        lieutenant receives the same set of values $v_1,...v_{n-1}$. Therefore they come to the same
+        value using the $majority(v_1,...,v_{n-1})$ function, proving IC1.
+    \end{minipage}%
 
-    This will give us two smaller triangulated graphs that both contain the edge $uv$. 
-    Continue in this manner until only triangles remain. 
-    \begin{figure}[h!]
-        \begin{minipage}{.3\textwidth}
-            \centering
-            \includegraphics[scale=.17]{figures/art-gallery-triangulated-fb-2b.pdf}          
-        \end{minipage}%
-        \begin{minipage}{.3\textwidth}
-            \centering
-            \includegraphics[scale=.17]{figures/art-gallery-triangulated-fb-3b.pdf}          
-        \end{minipage}%
-        \begin{minipage}{.3\textwidth}
-            \centering
-            \includegraphics[scale=.17]{figures/art-gallery-triangulated-fb-4.pdf}           
-        \end{minipage}
-    \end{figure}
-
-    \pagebreak
-
-    We can color each triangle using three colors. 
-    Paste these colorings together to form a 3-coloring of $P$. 
-    \begin{figure}[h!]
-        \begin{minipage}{.5\textwidth}
-            \centering
-            \includegraphics[scale=.25]{figures/art-gallery-triangulated-fb-10.pdf}      
-        \end{minipage}%
-        \begin{minipage}{.5\textwidth}
-            \centering 
-            \includegraphics[scale=.25]{figures/art-gallery-colored.pdf}          
-        \end{minipage}
-    \end{figure}
-
-    We choose one of the three colors. 
-    For every vertex of that color, we assign a guard. 
-    Since every triangle contains that color, we know that each triangle is guarded. 
-    So the whole museum can be guarded by the floor of $\frac{n}{3}$ guards.
+    This proves that OM($m$) satisfies IC1 and IC2 if there is more than $3m$ generals.
 \end{proof}
 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[scale=.25]{figures/art-gallery-guarded.pdf}
-    % caption
-\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Signed Messages 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Signed Messages}
 
-In our example we placed our guards at the yellow vertices, which required three guards to guard the
-museum. If we had instead place guards at the green vertices then we would have only needed to use 
-two guards. This helps show that the theorem is only stating how many guards will be sufficient to
-guard the museum, it does not say that $\frac{n}{3}$ will be the minimum number of guards that could
-guard the museum.
+So far we have been looking at oral, unsigned messages. This make finding a solution to the Byzantine
+Generals Problem more difficult because it allows the traitorous generals to lie. Restricting a
+traitor's ability to lie would make solving the problem easier. In this section we will explore that
+by having each general send signed messages with a signature that cannot be forged. To do this we
+need more assumptions:
+
+\begin{enumerate}[label={A4.}]
+    \item {
+        \begin{enumerate}[label={(\alph*)}]
+            \item {
+                A loyal general's signature cannot be forged, and any alterations of the contents of
+                their signed messages can be detected.
+            }
+            \item Anyone can verify the authenticity of a general's signature.
+        \end{enumerate}
+    }
+\end{enumerate}
+
+No assumptions are made about traitors' signature. It is possible for traitors to forge another
+traitor's signature and to collude in that manner.
+
+This new algorithm is able to cope with $m$ traitors for any amount of generals, due to the messages
+now being signed. The authors do note that it does not make much sense for less than $m+2$ generals.
+
+In this new algorithm, every when the commander sends an order he signs it. So each lieutenant receives
+an order with the commanders signature. They then add their signature to the message before sending
+it to the other lieutenants. Since each lieutenant will receive multiple messages with orders, we
+need a choice function to decide which order to follow. The only requirements for such a function are:
+
+\begin{enumerate}[label={\arabic{enumi}.}]
+    \item If the set $V$ consists of the single element $v$, then $choice(V) = v$.
+    \item $choice(\emptyset)=$ RETREAT, where $\emptyset$ is the empty set.
+\end{enumerate}
+
+\noindent The actual decision for deciding between different orders, as it will differ between
+implementations. It only matters that all loyal generals use the same decision making process.
+
+In the algorithm we denote the value $x$ signed by General $i$ as $x:i$. That means $v:j:i$ would be the 
+value $v$ signed by General $j$ and then signed by General $i$. Each General $i$ maintains a set of properly
+signed orders $V_i$. A loyal commander should never have more than one element in $V_i$. $V_i$ is specifically
+the set of orders a general has received, not the set of messages he has received.
+
+\noindent\emph{Algorithm SM($m$), $m$ > 0} \\
+Initially $V_i=\{\}$
+\vspace{-10pt}
+\begin{enumerate}[label=\arabic{enumi}.]
+    \item The commander signs and sends their value to every lieutenant.
+    \item For each $i$,
+    \begin{enumerate}[label={\alph*.}]
+        \item {
+            If Lieutenant $i$ receives a message from the commander of form $v:0$ and they have not received
+            any other order, then:
+            \begin{enumerate}[label=\roman*.]
+                \item they set $V_i=\{v\}$.
+                \item they send the message $v:0:i$ to every other lieutenant.
+            \end{enumerate}
+        }
+        \item {
+            If Lieutenant $i$ receives a message of the form $v:0:j_1:...:j_k$ and $v$ is not in $V_i$, 
+            then:
+            \begin{enumerate}[label=\roman*.]
+                \item he adds $v$ to $V_i$.
+                \item {
+                    if $k < m$, then he sends the message $v:0:j_1:...:j_k:i$ to every other lieutenant,
+                    except for $j_1,...,j_k$.
+                }
+            \end{enumerate}
+        }
+        \item {
+            For each $i$, when Lieutenant $i$ receives no more messages, he follows the result from 
+            $choice(V_i)$.
+        }
+    \end{enumerate}
+    
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Missing Communication Paths
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Missing Communication Paths}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  Applications ?
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 % \section{Applications}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  Conclusion
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\pagebreak
-
 \section{Conclusion}
 
-There are several variants to the art gallery theorem. 
-For example, we may only want to guard the walls, since that's where the actual 
-paintings will be, or guards may only be stationed at edges. 
-An unsolved variant states: suppose each guard may patrol one wall of the museum, 
-so they walk along their wall and see anything that can be seen from any point 
-along that wall. How many ``wall guards'' do we then need to keep control?
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[scale=.25]{figures/n4-polygon-fb.pdf}
-\end{figure}
-
-Godfried Toussaint constructed the example of a museum which shows that 
-the floor of $\frac{n}{4}$ guards might be necessary. 
-This polygon has 28 sides, and only requires 7 wall-guards to guard it. 
-The way this is accomplished is by placing a guard at the foot of each leg 
-of the polygon.
-It is conjectured that, besides some small values of n, that the floor of $\frac{n}{4}$ is 
-also sufficient, but there is still no proof for it.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  References
@@ -359,8 +497,10 @@ also sufficient, but there is still no proof for it.
 \bibliographystyle{amsplain}
 \begin{thebibliography}{10}
 
-\bibitem{AZ} M. Aigner and G. Ziegler, ``Proofs From THE BOOK,'' $3^{rd}$ edition, Springer-Verlag, 2004. 203-205.
-
+\bibitem{LL} {
+    L. Lamport, R. Shostak, and M. Pease, ``The Byzantine Generals Problem'', ACM Transactions on 
+    Programming Languages and Systems, Vol. 4, No. 3, 1982, 382-401.
+}
 \end{thebibliography}
 
 \end{document}
