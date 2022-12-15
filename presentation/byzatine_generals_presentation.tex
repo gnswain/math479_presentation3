@@ -82,13 +82,57 @@
 \end{frame}
 
 \begin{frame}
-    \begin{enumerate}[label={\Alph*.}]
-        \item All loyal generals decide upon the same plan of action.
-        \item A small number of traitors cannot cause the loyal generals to adopt a bad plan.
-    \end{enumerate}
+    \begin{itemize}[label={$\bullet$.}]
+        \item Condition A is met by having the generals use the same method of decision making.
+        \item<2-> Condition B is met by having the generals use a robust decision making method.
+    \end{itemize}
 \end{frame}
 
+\begin{frame}
+    \begin{enumerate}[label={\arabic{enumi}.}]
+        \item<1-> Every loyal general must obtain the same information $v_1,...,v_n$.
+        \item<2-> {
+            If the $i^{th}$ general is loyal, then the value that they sends must be used by every loyal 
+            general as the value of $v_i$.
+        }
+    \end{enumerate}
+    \vspace{10pt}
+    \only<4-> {Condition 1 can be rewritten as:}
+    \begin{enumerate}[label={\arabic{enumi}$^\prime$.}]
+        \item<4-> For every $i$, any two loyal generals use the same value of $v_i$.
+    \end{enumerate} 
+\end{frame}
 
+\begin{frame}
+    To help ensure that Condition A and Condition B are met, we need to meet two other conditions:
+    \begin{enumerate}[label={IC\arabic{enumi}.}]
+        \item<2-> All loyal lieutenants obey the same order.
+        \item<3-> If the commander is loyal, then every loyal lieutenant obeys the order they sends.
+    \end{enumerate} 
+\end{frame}
+
+\begin{frame}
+    \begin{itemize}[label={$\bullet$.}]
+        \item Loyal generals cannot take a value $v_i$ at face value.
+        \item<2-> {
+            Condition 1$^\prime$ and Condition 2 are both contingent on a single $v_i$ sent by the $i^{th}$
+            general.
+        } 
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \begin{block}{Byzantine Generals Problem}
+        \only<2-> {A commanding general must send an order to their $n - 1$ lieutenants such that:}
+
+        \only<3-> {
+            \begin{enumerate}[label={IC\arabic{enumi}.}]
+                \item<3-> All loyal lieutenants obey the same order.
+                \item<4-> If the commander is loyal, then every loyal lieutenant obeys the order they sends.
+            \end{enumerate}
+        }
+    \end{block}
+\end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  Three Generals
